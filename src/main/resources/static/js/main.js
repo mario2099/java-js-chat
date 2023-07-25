@@ -1,25 +1,15 @@
 'use strict';
-// LOGIN PAGE
-var usernamePage = document.querySelector('#username-page');
-var usernameForm = document.querySelector('#usernameForm');
 
-//CHAT PAGE
+var usernamePage = document.querySelector('#username-page');
 var chatPage = document.querySelector('#chat-page');
+var usernameForm = document.querySelector('#usernameForm');
 var messageForm = document.querySelector('#messageForm');
 var messageInput = document.querySelector('#message');
 var messageArea = document.querySelector('#messageArea');
-
-//CONNECTING...
 var connectingElement = document.querySelector('.connecting');
-
-//CHANNELS SECTION
-var channelPage = document.querySelector('#channel-page');
-
-
 
 var stompClient = null;
 var username = null;
-var connectedUsers = [];
 
 var colors = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
@@ -32,7 +22,6 @@ function connect(event) {
     if(username) {
         usernamePage.classList.add('hidden');
         chatPage.classList.remove('hidden');
-        channelPage.classList.remove('hidden');
 
         var socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
@@ -53,17 +42,6 @@ function onConnected() {
         JSON.stringify({sender: username, type: 'JOIN'})
     )
 
-    
-    username = document.querySelector('#name').value.trim();
-    connectedUsers.push(username);
-
-    // Update the channel-page with the list of connected users
-    updateChannelPage();
-    
-    // Subscribe to private channel
-    stompClient.subscribe( username + '/private', onPrivateMessageReceived);
-
-    //Hide "Connecting..." text
     connectingElement.classList.add('hidden');
 }
 
@@ -76,29 +54,18 @@ function onError(error) {
 
 function sendMessage(event) {
     var messageContent = messageInput.value.trim();
-    if (messageContent && stompClient) {
+    if(messageContent && stompClient) {
         var chatMessage = {
             sender: username,
             content: messageInput.value,
             type: 'CHAT'
         };
-        if (messageContent.startsWith('@')) {
-            var recipient = messageContent.split(' ')[0].substring(1);
-            chatMessage.recipient = recipient;
-            sendPrivateMessage(chatMessage);
-        } else {
-            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
-        }
+        stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
         messageInput.value = '';
     }
     event.preventDefault();
 }
 
-function sendPrivateMessage(chatMessage) {
-    if (stompClient) {
-        stompClient.send("/app/chat.sendPrivateMessage", {}, JSON.stringify(chatMessage));
-    }
-}
 
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
@@ -137,60 +104,6 @@ function onMessageReceived(payload) {
     messageArea.scrollTop = messageArea.scrollHeight;
 }
 
-function onPrivateMessageReceived(payload) {
-
-    // Check if the received message type is 'LEAVE'
-    if (message.type === 'LEAVE') {
-
-        // Remove the username from the connectedUsers array
-        var index = connectedUsers.indexOf(message.sender);
-        if (index !== -1) {
-            connectedUsers.splice(index, 1);
-        }
-        // Update the channel-page with the updated list of connected users
-        updateChannelPage();
-    }
-    // Parse the payload received from the server into a JavaScript object
-    var message = JSON.parse(payload.body);
-
-    // Create a new list item element to represent the private message
-    var messageElement = document.createElement('li');
-    messageElement.classList.add('private-message');
-
-    // Create an element for the avatar (initial letter of sender's username)
-    var avatarElement = document.createElement('i');
-    var avatarText = document.createTextNode(message.sender[0]);
-    avatarElement.appendChild(avatarText);
-
-    // Set the background color of the avatar using a helper function getAvatarColor()
-    avatarElement.style['background-color'] = getAvatarColor(message.sender);
-
-    // Add the avatar element to the message element
-    messageElement.appendChild(avatarElement);
-
-    // Create an element for the username of the sender
-    var usernameElement = document.createElement('span');
-    var usernameText = document.createTextNode(message.sender);
-    usernameElement.appendChild(usernameText);
-
-    // Add the username element to the message element
-    messageElement.appendChild(usernameElement);
-
-    // Create an element for the text content of the message
-    var textElement = document.createElement('p');
-    var messageText = document.createTextNode(message.content);
-    textElement.appendChild(messageText);
-
-    // Add the text element to the message element
-    messageElement.appendChild(textElement);
-
-    // Add the message element to the message area (the chat display)
-    messageArea.appendChild(messageElement);
-
-    // Scroll to the bottom of the message area to show the latest message
-    messageArea.scrollTop = messageArea.scrollHeight;
-}
-
 
 function getAvatarColor(messageSender) {
     var hash = 0;
@@ -199,17 +112,6 @@ function getAvatarColor(messageSender) {
     }
     var index = Math.abs(hash % colors.length);
     return colors[index];
-}
-
-function updateChannelPage() {
-    var channelArea = document.querySelector('.channel-area');
-
-    connectedUsers.forEach(function (user) {
-        var userItem = document.createElement('li');
-        userItem.textContent = user;
-        userItem.onclick = sendPrivateMessage();
-        channelArea.appendChild(userItem);
-    });
 }
 
 usernameForm.addEventListener('submit', connect, true)
