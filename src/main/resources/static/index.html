@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
     <title>Spring Boot WebSocket Chat Application</title>
     <link rel="stylesheet" href="./css/main.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@500&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -13,7 +16,7 @@
     </noscript>
 
     <!-- <div id="username-page" class="hidden"> -->
-    <div id="username-page">
+        <div id="username-page">
         <div class="username-page-container">
             <h1 id="form-title" class="title">
                 Type your username to enter the Chatroom
@@ -30,24 +33,38 @@
             </form>
         </div>
     </div>
-    <div class="page-container">
+    <div id="page-container" class="hidden">
+    <!-- <div id="page-container" class="page-container"> -->
         <div id="channel-page" class="hidden">
         <!-- <div id="channel-page"> -->
             <div class="channel-container">
                 <div class="channel-header">
-                    <h3>Channels</h3>
+                    <h2>Channels</h2>
                 </div>
+
                 <ul class="channel-area">
-                    <li>Public</li>
+                    <div class="channel-element">
+                        <li class="channel-logo">P</li>
+                        <li>Public</li>
+                    </div>
                 </ul>
+                <div class="user-profile">
+                    <i id="user-logo"></i>
+                    <p id="user-profile-name"></p>
+                </div>
             </div>
+            <!-- <div class="profile-container"> -->
+                
+            <!-- </div> -->
+
+
         </div>
         <div id="chat-page" class="hidden">
         <!-- <div id="chat-page"> -->
             <div class="chat-container">
                 <div class="chat-header">
                     <!-- todo: implement a function to set this title to a title of a selected channel -->
-                    <h2>Chat Title</h2>
+                    <h2>Public</h2>
                 </div>
                 <div class="connecting">Connecting...</div>
                 <ul id="messageArea"></ul>

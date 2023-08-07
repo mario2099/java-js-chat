@@ -1,12 +1,26 @@
 'use strict';
 
+var pageContainer = document.querySelector('#page-container');
+
+// LOGIN PAGE
 var usernamePage = document.querySelector('#username-page');
-var chatPage = document.querySelector('#chat-page');
 var usernameForm = document.querySelector('#usernameForm');
+
+//CHAT PAGE
+var chatPage = document.querySelector('#chat-page');
 var messageForm = document.querySelector('#messageForm');
 var messageInput = document.querySelector('#message');
 var messageArea = document.querySelector('#messageArea');
+
+//CONNECTING...
 var connectingElement = document.querySelector('.connecting');
+
+//CHANNELS SECTION
+var channelPage = document.querySelector('#channel-page');
+
+//PROFILE SECTION
+var profileLogo = document.querySelector('#user-logo');
+var profileUsername = document.querySelector('#user-profile-name');
 
 var stompClient = null;
 var username = null;
@@ -22,6 +36,9 @@ function connect(event) {
     if(username) {
         usernamePage.classList.add('hidden');
         chatPage.classList.remove('hidden');
+        channelPage.classList.remove('hidden');
+        pageContainer.classList.remove('hidden');
+        pageContainer.classList.add('page-container');
 
         var socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
@@ -42,7 +59,10 @@ function onConnected() {
         JSON.stringify({sender: username, type: 'JOIN'})
     )
 
+    createProfileCard();
+
     connectingElement.classList.add('hidden');
+
 }
 
 
@@ -112,6 +132,22 @@ function getAvatarColor(messageSender) {
     }
     var index = Math.abs(hash % colors.length);
     return colors[index];
+}
+
+function createProfileCard(){
+    username = document.querySelector('#name').value.trim();
+
+    // Get the user's avatar color
+    var avatarColor = getAvatarColor(username);
+
+    // Set the profile card background color to the user's avatar color
+    profileLogo.style.backgroundColor = avatarColor;
+
+    // Set the profile card username
+    profileUsername.textContent = username; 
+
+    //
+    profileLogo.textContent = username[0];
 }
 
 usernameForm.addEventListener('submit', connect, true)
